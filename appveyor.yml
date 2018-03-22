@@ -7,6 +7,7 @@ environment:
 install:
   - node --version
   - npm --version
+  - msinfo32
   - copy .\gnvm.exe "C:\Program Files (x86)\nodejs\"
   - gnvm version
   - gnvm update latest
