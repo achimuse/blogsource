@@ -7,12 +7,14 @@ environment:
 install:
   - node --version
   - npm --version
-  - npm install
   - git clone git@github.com:Kenshin/gnvm-bin.git
   - copy .\gnvm-bin\64-bit\gnvm.exe "C:\Program Files (x86)\nodejs\"
   - gnvm version
   - gnvm update latest
   - gnvm npm latest
+  - node --version
+  - npm --version
+  - npm install
   - npm install hexo-cli -g
   
 
