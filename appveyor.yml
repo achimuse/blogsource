@@ -7,9 +7,13 @@ environment:
 install:
   - node --version
   - npm --version
-  - npm install hexo-cli -g
-  - npm install hexo --save
+  - npm install -g n
+  - n stable
+  - node --version
+  - npm --version
   - npm install
+  - npm install hexo-cli -g
+  
 
 build_script:
   - hexo generate
