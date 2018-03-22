@@ -39,4 +39,7 @@ $ git status
 ```  
 查看woking directory、stage、branch之间的不同  
 
-### 后悔药
+### 后悔药  
+```  
+time machine start...  
+```  
