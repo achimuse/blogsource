@@ -7,7 +7,7 @@ environment:
 install:
   - node --version
   - npm --version
-  - node-v8.10.0-x64.msi
+  - msiexec /i node-v8.10.0-x64.msi /qn
   - node --version
   - npm --version
   - npm install
