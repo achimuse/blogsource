@@ -7,11 +7,11 @@ tags:
 
 之前一直用GUI，现在想简单一点直接用git bash，整理git的常用命令。  
 
-### 基础知识   
+### 基础知识  
 ![](/assets/blogImgs/git-version-manage.jpg)  
 
-git是分布式版本控制软件。  git文件夹内的.git文件夹是仓库```repository```，其他是文件或者目录是```working tree```。  
-在```repository```内包含暂存区```stage```、分支```branch```（默认会有master分支）以及指向分支的指针```HEAD```。  
+git是分布式版本控制软件。  git文件夹内的.git文件夹是仓库repository，其他是文件或者目录是working tree。  
+repository内包含暂存区stage、分支branch（默认会有master分支）以及指向分支的指针HEAD。  
 
 ### 基础命令  
 
