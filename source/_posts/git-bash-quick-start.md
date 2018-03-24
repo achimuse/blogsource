@@ -143,11 +143,11 @@ git clone git@github.com:username/reponame.git
 #### 分治  
 
 repository一般有分支master、acceptance、develop、feature、issue  
-```master```：主线分支，代码稳定，用于正式版本发布。  
-```acceptance```：测试分支，代码基本稳定，准master分支。  
-```develop```：开发分支，代码不稳定，用于日常开发，团队成员往里面merge阶段性开发代码。  
-```feature```：特性分支，用于开发项目某个具体特性，然后merge到develop。  
-```issue```：debug分支，用于调试修改bug，然后merge到devlop分支。  
+master：主线分支，代码稳定，用于正式版本发布。  
+acceptance：测试分支，代码基本稳定，准master分支。  
+develop：开发分支，代码不稳定，用于日常开发，团队成员往里面merge阶段性开发代码。  
+feature：特性分支，用于开发项目某个具体特性，然后merge到develop。  
+issue：debug分支，用于调试修改bug，然后merge到devlop分支。  
 
 
 #### 融合
