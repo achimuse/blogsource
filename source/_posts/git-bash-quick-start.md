@@ -59,11 +59,33 @@ $ git checkout -b <branchname>
 ```
 第一条，从当前分支切换到branchname，具体内容是将branchname当前commit的内容复制到working tree上，清空stage,并将HEAD指向branchname。  
 第二条，创建并切换到branchname，具体内容是repository创建一个指针branchname指向当前分支的当前commit，并将HEAD指向branchname。  
+
 **注意**
 切换分支的时候要保证working tree clean && nothing to commit，否则会比较麻烦。  
-假设当前分支develop下的working tree有改动，又不想commit，想直接去别的分支解决问题，则可以使用```$ git stash```将working tree现场暂存起来，恢复working tree clean的状态，然后再去别的分支解决问题。解决问题之后回到master，使用```$ git stash pop	```恢复working tree现场，继续工作。  
+假设当前分支develop下的working tree有改动，又不想commit，想直接去别的分支解决问题，则可以使用
+```bash
+$ git stash
+```
+将working tree现场暂存起来，恢复working tree clean的状态，然后再去别的分支解决问题。解决问题之后回到master，使用
+```bash
+$ git stash pop
+```
+恢复working tree现场，继续工作。  
+
 **注意注意**
-stash虽好可不要贪杯，因为stash是所有分支共用的，如果在两个分支都进行了stash操作，也就意味着stash list栈里有两个分支的working tree现场，这个时候要使用```$ git stash list```查看到底哪一个stash是是属于当前分支的，辨别好后，手动使用```$ git stash apply stash@{n}```恢复现场，而且确定恢复正确后最好使用```$ git stash drop stash@{n}```删除该stash。如果回复现场用错了stash@{n}，那你会很苦恼，因为这又涉及到merge了，不要走到这一步，很麻烦。  
+stash虽好可不要贪杯，因为stash是所有分支共用的，如果在两个分支都进行了stash操作，也就意味着stash list栈里有两个分支的working tree现场，这个时候要使用
+```bash
+$ git stash list
+```
+查看到底哪一个stash是是属于当前分支的，辨别好后，手动使用
+```bash
+$ git stash apply stash@{n}
+```
+恢复现场，而且确定恢复正确后最好使用
+```bash
+$ git stash drop stash@{n}
+```
+删除该stash。如果回复现场用错了stash@{n}，那你会很苦恼，因为这又涉及到merge了，不要走到这一步，很麻烦。  
 最好不要多分支stash，不然stash就失去了其便利的意义了：P  
 
 
