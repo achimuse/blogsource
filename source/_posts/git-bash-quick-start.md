@@ -132,11 +132,29 @@ $ git [push | pull] origin master
 ```
 第一条，将local repository的branch master的内容push到remote，-u参数将local master和remote master关联起来，第二条，执行第一条以后直接使用push或pull。  
 
+```bash
+$ git pull
+```
+将remote分支的内容拉下来，和local分支进行merge，同时将merge结果checkout到working tree。  
+**注意**  
+
+如果local分支的working tree 有改动没有add、commit，这时pull有两种情况：
+- pull的结果不会导致overwrite the unadded modification of working tree，顺利pull，这时进行了merge，这时merge分为两种情况；  
+	- fast-forward模式，在local分支与remote分支处在同一commit链上。这时只有remote分支走在local分支前面的一种情况。因为local走在remote前面时，pull操作会提示already up to date。
+	- no-ff模式，local分支与remote分支不在一条链上（也就是local和remote各自commit过），有可能需要手动解决coflict。
+- pull的结果will overwrite the unadded modification of working tree, pull aborted。这时有两个选择：  
+	- stash the modification of working tree，然后pull，最后把stash pop出来,pop出来之后手动解决conflict。
+	- commit the modification of working tree,然后pull，最后手动解决conflict。
+
 **好的习惯是先在github上create repository，然后clone下来开发**  
 
 ```bash
-git clone git@github.com:username/reponame.git
+$ git clone git@github.com:username/reponame.git
+$ git clone -b branch git@github.com:username/reponame.git /path
+$ git branch -a
+$ git checkout -b develop origin/develop
 ```
+git clone会clone整个remote repository，但在local默认只创建master分支，其他分支可以指定创建。  
 
 ### 分支--分治--融合--删除  
 
