@@ -36,9 +36,9 @@ http请求的根本目标是操作资源，所以请求中使用URI定位资源�
 
 stateless，不会保存请求或相应的状态，优点在于减少服务器负担。如果需要状态则使用Cookie。客户端第一次向服务端发出请求（要求Cookie），服务端生成Cookie并记录下Cookie与客户端的映射，在响应返回Cookie,客户端收到后保存。之后的每个请求都带上Cookie，即保存了状态。Cookie就是一个字符id。  
 
-http报文实际是字符串文本，用CR+LF空行划分报文的首部和主体。报文分为请求报文和响应报文，报文的首部结构如下：  
-| Name | Academy | score | 
-| - | :-: | -: | 
-| Harry Potter | Gryffindor| 90 | 
-| Hermione Granger | Gryffindor | 100 | 
-| Draco Malfoy | Slytherin | 90 |
+http报文实际是字符串文本，用CR+LF空行划分报文的首部和主体。报文分为请求报文和响应报文，报文的结构如下：  
+![](/assets/blogImgs/httpPacket.jpg)  
+![](/assets/blogImgs/httpPacketReal.jpg)  
+
+
+
