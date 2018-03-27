@@ -40,7 +40,8 @@ stateless，不会保存请求或相应的状态，优点在于减少服务器�
 http报文实际是字符串文本，用CR+LF空行划分报文的首部和主体。报文分为请求报文和响应报文。   
 ![](/assets/blogImgs/httpPacket.jpg)  
 > 请求行包含请求方法、URI、HTTP版本  
-  状态行包含状态吗、原因短语、HTTP版本
+  状态行包含状态吗、原因短语、HTTP版本  
+  
 ![](/assets/blogImgs/httpPacketReal.jpg)  
 
 
