@@ -57,10 +57,33 @@ http通信的基本单位，由octet sequence组成。如一个完整的请求�
 ![](/assets/blogImgs/formData.jpg)
 以下是一个真实的post请求，使用了表单上传.xlxs表格  
 ![请求头部](/assets/blogImgs/formRealHead.jpg)
-![请求实体](/assets/blogImgs/formRealEntity.jpg) 
+![请求主体](/assets/blogImgs/formRealEntity.jpg) 
 
 * multipart/byteranges  
-状态码206（Partial Content）响应报文包含多个范围内容时使用。 
-![](/assets/blogImgs/byteranges01.jpg)
-![](/assets/blogImgs/byteranges02.jpg) 
+范围请求（Range Request）指定请求实体范围，实现了了下载中断恢复功能。    
+在请求首部加上字段`Content-Range: bytes 7000-7999/8000`,返回状态码206（Partial Content）的响应报文。响应报文首部会有字段`Content-Type: multipart/byteranges; boundary=THIS_STRING_SEPARATES`。  
+返回的实体都会有`--THIS_STRING_SEPARATES`作为分界线，最后以`--THIS_STRING_SEPARATES--`标记结束。
+![响应首部](/assets/blogImgs/byterangesHead.jpg)
+![响应主体](/assets/blogImgs/byterangesEntity.jpg) 
+#### 内容协商（Content Negotiation）
+客户端会与服务端协商请求最适合的资源，主要在与资源的语言、字符集、编码方式。故请求的首部字段会有`Accept`/`Accept-Charset`/`Accept-Encoding`/`Accept-Language`/`Content_Language`等协商字段。
+#### 状态码
+![响应状态码](/assets/blogImgs/statusCode.jpg) 
+**2XX 成功**  
+`200 OK`：请求处理正常   
+`204 No Content`：请求处理正常，相应报文中无主体  
+`206 Partial Content`：范围请求  
+**3XX 重定向**  
+表明浏览器需要执行响应中的处理请求  
+`301 Moved Permanently`：永久重定向，资源分配到了新的URI，如果资源已被保存书签，浏览器会更新响应报文中`Location`字段的URI。  
+`302 Found`：临时重定向，希望浏览器请求响应报文中`Location`字段中的URI，方法未指定，通常是GET。  
+`303 See Other`：与302相同，但明确了浏览器使用GET方法。  
+**4XX 客户端错误**  
+表明请求中存在错误
+`401 Unauthorized`：用户需要认证或者认证失败，浏览器会弹出认证窗口。  
+`403 Forbidden`：拒绝该请求访问。  
+`404 Not Found`：服务端无请求的资源。    
+**5XX 服务端错误**  
+`500 Internet Server Error`：执行请求出错，服务端内部错误。  
+`503 Service Unavailable`：服务端出于停机维护状态。  
 
