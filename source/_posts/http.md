@@ -22,23 +22,25 @@ news:comp.infosystems.www.servers.unix (also a URL because of the protocol)
 >tel:+1-816-555-1212  
 >telnet://192.0.2.16:80/ (also a URL because of the protocol)  
 >urn:oasis:names:specification:docbook:dtd:xml:4.1.2  
-### 简单的理解
+### 基本概念
+#### 被动性  
 http协议在一条通路上必然有一端是客户端另一端是服务端，而且只能由客户端发出请求，服务端响应该请求。  
-
+#### 常用方法
 http请求的根本目标是操作资源，所以请求中使用URI定位资源，使用方法表明意图(restful)：  
 - GET方法，请求资源，查  
 - POST方法，推送资源，增  
 - PUT方法，改动资源，改  
 - DELETE方法，删除资源，删
 - HEAD方法，同GET，响应不返回报文主体，用于确认URI有效性和资源更新时间  
-
+#### 持久连接与管道化
 持久连接（HTTP Persistent Connections），建立TCP连接后只要任一端没有提出断开连接，则保持连接状态，提高请求相应速度。在同一TCP连接上会有多有HTTP连接，同时线管化（Pipelining）方式使得不用等待上个请求的相应就可以发送下一个请求。  
-
+#### 无状态与Cookie
 stateless，不会保存请求或相应的状态，优点在于减少服务器负担。如果需要状态则使用Cookie。客户端第一次向服务端发出请求（要求Cookie），服务端生成Cookie并记录下Cookie与客户端的映射，在响应返回Cookie,客户端收到后保存。之后的每个请求都带上Cookie，即保存了状态。Cookie就是一个字符id。  
-
-http报文实际是字符串文本，用CR+LF空行划分报文的首部和主体。报文分为请求报文和响应报文，报文的结构如下：  
+#### 报文结构
+http报文实际是字符串文本，用CR+LF空行划分报文的首部和主体。报文分为请求报文和响应报文。   
 ![](/assets/blogImgs/httpPacket.jpg)  
+> 请求行包含请求方法、URI、HTTP版本  
+  状态行包含状态吗、原因短语、HTTP版本
 ![](/assets/blogImgs/httpPacketReal.jpg)  
-
 
 
