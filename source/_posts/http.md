@@ -126,4 +126,30 @@ HTTP实际通信中，除了客户端和服务端，还有其他通信数据转�
 **客户端缓存**  
 浏览器也可以缓存一定的资源内容。  
 
-## HTTP首部
+## HTTP首部字段
+首部字段是报文的要素，表明报文主体大小、使用的语言、编码方式、认证信息等等。
+### 首部字段结构
+由首部字段名和字段值组成，用:分隔。例如Content-Type字段，表明报文主体的对象类型。
+![](/assets/blogImgs/headerField.jpg)
+单个首部字段可以有多个字段值。
+![](/assets/blogImgs/headerField.jpg)
+### 首部字段类型
+**通用首部字段（General Header Fields）**  
+请求报文和响应报文两方都会使用的首部。  
+![](/assets/blogImgs/generalHeader.jpg)
+
+**请求首部字段（Request Header Fields）**  
+从客户端向服务器端发送请求报文时使用的首部。补充了请求的附加
+内容、客户端信息、响应内容相关优先级等信息。  
+![](/assets/blogImgs/requestHeader.jpg)
+
+**响应首部字段（Response Header Fields）**  
+从服务器端向客户端返回响应报文时使用的首部。补充了响应的附加
+内容，也会要求客户端附加额外的内容信息。  
+![](/assets/blogImgs/responseHeader.jpg)
+
+**实体首部字段（Entity Header Fields）**  
+针对请求报文和响应报文的实体部分使用的首部。补充了资源内容更
+新时间等与实体有关的信息。  
+![](/assets/blogImgs/entityHeader.jpg)
+
