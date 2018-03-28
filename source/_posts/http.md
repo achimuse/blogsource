@@ -3,11 +3,9 @@ title: http协议小记
 date: 2018-03-26 17:03:56
 tags:
 	- web
----
-### 概述
-当前http协议主流版本是HTTP/1.1, 预计不久将来会使用HTTP/2.0  
+--- 
 
-### URI/URL/URN
+## URI/URL/URN
 ![](/assets/blogImgs/url.jpg)
 URI是 Uniform Resource Identifiers 的简写，统一资源标识符。  
 URL是 Uniform Resource Locators 的简写，统一资源定位符。  
@@ -24,11 +22,11 @@ news:comp.infosystems.www.servers.unix (also a URL because of the protocol)
 >telnet://192.0.2.16:80/ (also a URL because of the protocol)  
 >urn:oasis:names:specification:docbook:dtd:xml:4.1.2  
 
-### 基本概念
-#### 被动性  
+## 基本概念
+### 被动性  
 http协议在一条通路上必然有一端是客户端另一端是服务端，而且只能由客户端发出请求，服务端响应该请求。  
 
-#### 常用方法
+### 常用方法
 http请求的根本目标是操作资源，所以请求中使用URI定位资源，使用方法表明意图(restful)：  
 - GET方法，请求资源，查  
 - POST方法，推送资源，增  
@@ -36,18 +34,18 @@ http请求的根本目标是操作资源，所以请求中使用URI定位资源�
 - DELETE方法，删除资源，删
 - HEAD方法，同GET，响应不返回报文主体，用于确认URI有效性和资源更新时间  
 
-#### 持久连接与管道化
+### 持久连接与管道化
 持久连接（HTTP Persistent Connections），建立TCP连接后只要任一端没有提出断开连接，则保持连接状态，提高请求相应速度。在同一TCP连接上会有多有HTTP连接，同时线管化（Pipelining）方式使得不用等待上个请求的相应就可以发送下一个请求。  
 
-#### 无状态与Cookie
+### 无状态与Cookie
 stateless，不会保存请求或相应的状态，优点在于减少服务器负担。如果需要状态则使用Cookie。客户端第一次向服务端发出请求（要求Cookie），服务端生成Cookie并记录下Cookie与客户端的映射，在响应返回Cookie,客户端收到后保存。之后的每个请求都带上Cookie，即保存了状态。Cookie就是一个字符id。  
 
-#### 报文结构
+### 报文结构
 http报文实际是字符串文本，用CR+LF空行划分报文的首部和主体。报文分为请求报文和响应报文。请求行包含请求方法、URI、HTTP版本，状态行包含状态吗、原因短语、HTTP版本。  
 ![](/assets/blogImgs/httpPacket.jpg)  
 ![](/assets/blogImgs/httpPacketReal.jpg)  
 
-#### 传输
+### 传输
 http报文在传输过程中，通过内容编码提升传输速率，通过分块实现浏览器逐步显示。  
 
 **报文（message）**  
@@ -78,10 +76,10 @@ http通信的基本单位，由octet sequence组成。如一个完整的请求�
 ![响应首部](/assets/blogImgs/byterangesHead.jpg)
 ![响应主体](/assets/blogImgs/byterangesEntity.jpg)   
 
-#### 内容协商（Content Negotiation）
+### 内容协商（Content Negotiation）
 客户端会与服务端协商请求最适合的资源，主要在与资源的语言、字符集、编码方式。故请求的首部字段会有`Accept`/`Accept-Charset`/`Accept-Encoding`/`Accept-Language`/`Content_Language`等协商字段。  
 
-#### 状态码
+### 状态码
 ![响应状态码](/assets/blogImgs/statusCode.jpg) 
 **2XX 成功**  
 `200 OK`：请求处理正常   
@@ -99,12 +97,33 @@ http通信的基本单位，由octet sequence组成。如一个完整的请求�
 `401 Unauthorized`：用户需要认证或者认证失败，浏览器会弹出认证窗口。  
 `403 Forbidden`：拒绝请求访问。  
 `404 Not Found`：服务端无请求的资源。  
-  
+
 **5XX 服务端错误**  
 `500 Internet Server Error`：执行请求出错，服务端内部错误。  
 `503 Service Unavailable`：服务端出于停机维护状态。  
 
-#### 通信数据转发
-HTTP实际通信中，除了客户端和服务端，还有其他通信数据转发程序。  
+### 通信数据转发
+HTTP实际通信中，除了客户端和服务端，还有其他通信数据转发程序。 
+
 **代理**  
-中间人程序，接收客户端请求转发给服务端，接收服务端响应转发给客户端。
+中间人程序，接收客户端请求转发给服务端，接收服务端响应转发给客户端。代理有两种基本分类，一种是是否使用缓存，另一种是否修改报文。  
+缓存代理（Caching Proxy），预先保留资源缓存，接收到相同资源请求时直接响应返回资源缓存。  
+透明代理（Transparent Proxy），转发请求或响应时不改动报文。反之为非透明代理。  
+
+**网关**  
+类似于代理，但网关能使通信线路上的服务器提供非http协议服务（比如微服务架构的kong网关）。  
+![](/assets/blogImgs/gateway.jpg)  
+
+**隧道**  
+隧道建立安全的通信线路，不会解析http报文，使用SSL加密通信。  
+
+### 缓存
+缓存代理服务器可以避免多次从源服务器转发资源，客户端可更快地获取资源，也减轻服务端处理负担。  
+
+**TTL（Time to Live）**  
+由于源服务器资源更新时，缓存无法保证其有效性。缓存服务器会依据包含`no-cache`字段的请求、缓存有效期等因素，向源服务器确认资源的有效性，判断失效则会拉取新的资源。  
+
+**客户端缓存**  
+浏览器也可以缓存一定的资源内容。  
+
+## HTTP首部
