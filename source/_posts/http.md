@@ -2,8 +2,8 @@
 title: http协议小记
 date: 2018-03-26 17:03:56
 tags:
-	- web
---- 
+ - web
+---
 
 ## URI/URL/URN
 ![](/assets/blogImgs/url.jpg)
