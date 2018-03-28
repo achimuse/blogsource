@@ -197,14 +197,58 @@ HTTP实际通信中，除了客户端和服务端，还有其他通信数据转�
 内容，也会要求客户端附加额外的内容信息。  
 ![](/assets/blogImgs/responseHeader.jpg)
 **Accept-Ranges**  
-告知客户端服务端能否处理范围请求，以指定获取服务器端某个部分的资源。可指定的字段值有两种，可处理范围请求时指定其为 bytes，反之则指定其为 none。  
+告知客户端服务端能否处理范围请求Range，可处理范围请求时指定其为 bytes，反之则指定其为 none。  
 `Accept-Ranges: bytes`  
 `Accept-Ranges: none`  
 
+**Age**  
+缓存服务器用于告知客户端，该响应是源服务器在多久前创建的，单位sec。  
+`Age: 600`  
 
+**Location**  
+配合 3xx ：Redirection 的响应，提供重定向的URI。浏览器接收响应后会对Location的URI进行访问。  
+`location: https://account.aliyun.com/login/login.htm?oauth_callback=https%6A%2Fecs.console.aliyun.com%7F`
+
+**Server**  
+告知客户端当前服务器上安装的 HTTP 服务器应用程序的信息。标出服务器上的软件应用名称，可能包括版
+本号和安装启用的可选项，比如以下Bing的Server信息。  
+`server: Microsoft-IIS/10.0`  
+
+**WWW-Authenticate**  
+用于 HTTP 访问认证。告知客户端适用于访问请求 URI 指定资源的认证方案（Basic 或是Digest）和带参数提示的质询（challenge）。状态码 401 Unauthorized 响应中，一定带有首部字段 WWW-Authenticate。  
+`WWW-Authenticate: Basic realm="Usagidesign Auth"`  
 
 #### 实体首部字段（Entity Header Fields）
 针对请求报文和响应报文的实体部分使用的首部。补充了资源内容更
 新时间等与实体有关的信息。  
 ![](/assets/blogImgs/entityHeader.jpg)
+**Content-Encoding**  
+告知客户端实体的主体部分选用的内容编码方式（就是压缩方式）。  
+`Content-Encoding: gzip`  
+
+**Content-Language**  
+告知客户端实体主体使用的自然语言。  
+`Content-Language: zh-CN`  
+
+**Content-Length**  
+告知客户端实体主体部分的大小（单位是字节）。  
+`Content-Length: 15000` 
+
+**Content--Type**  
+告知客户端实体主体内对象的媒体类型, 和首部字段Accept一样，字段值用 type/subtype 形式赋值。  
+`Content-Type: text/html; charset=UTF-8`  
+
+**Content--Range**  
+针对范围请求，返回响应时使用的首部字段Content-Range，能告知客户端作为响应返回的实体的哪个部分符合范围请求。字段值以字节为单位，表示当前发送部分及整个实体大小。  
+![](/assets/blogImgs/contentRange.jpg)
+
+**Content-Location**  
+Content-Location 表示的是报文主体返回资源对应的URI。  
+
+**Expires**  
+将资源失效的日期告知客户端。缓存服务器在接收到含有首部字段Expires的响应后，会以缓存来应答请求，在Expires字段值指定的时间之前，响应的副本会一直被保存。当超过指定的时间后，缓存服务器在请求发送过来时，会转向源服务器请求资源。  
+源服务器不希望缓存服务器对资源缓存时，最好在 Expires 字段内写入与首部字段 Date 相同的时间值。  
+当首部字段Cache-Control有指定 max-age 指令时，比起首部字段 Expires，会优先处理 max-age 指令。  
+`Expires: Wed, 04 Jul 2012 08:26:05 GMT` 
+
 
