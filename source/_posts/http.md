@@ -5,7 +5,7 @@ tags:
  - web
 ---
 
-## URI/URL/URN
+### URI/URL/URN
 ![](/assets/blogImgs/url.jpg)
 URI是 Uniform Resource Identifiers 的简写，统一资源标识符。  
 URL是 Uniform Resource Locators 的简写，统一资源定位符。  
@@ -22,7 +22,6 @@ news:comp.infosystems.www.servers.unix (also a URL because of the protocol)
 >telnet://192.0.2.16:80/ (also a URL because of the protocol)  
 >urn:oasis:names:specification:docbook:dtd:xml:4.1.2  
 
-## 基本概念
 ### 被动性  
 http协议在一条通路上必然有一端是客户端另一端是服务端，而且只能由客户端发出请求，服务端响应该请求。  
 
@@ -249,6 +248,38 @@ Content-Location 表示的是报文主体返回资源对应的URI。
 将资源失效的日期告知客户端。缓存服务器在接收到含有首部字段Expires的响应后，会以缓存来应答请求，在Expires字段值指定的时间之前，响应的副本会一直被保存。当超过指定的时间后，缓存服务器在请求发送过来时，会转向源服务器请求资源。  
 源服务器不希望缓存服务器对资源缓存时，最好在 Expires 字段内写入与首部字段 Date 相同的时间值。  
 当首部字段Cache-Control有指定 max-age 指令时，比起首部字段 Expires，会优先处理 max-age 指令。  
-`Expires: Wed, 04 Jul 2012 08:26:05 GMT` 
+`Expires: Wed, 04 Jul 2012 08:26:05 GMT`   
 
+#### Cookie首部字段（RCookie Fields）  
+**Set-Cookie**  
+当服务器准备开始管理客户端的状态时，会事先告知各种信息。以下是Set-Cookie 的字段值。
+![](/assets/blogImgs/setCookie.jpg)
 
+**Cookie**  
+首部字段 Cookie 会告知服务器，当客户端想获得 HTTP 状态管理支
+持时，就会在请求中包含从服务器接收到的 Cookie。接收到多个
+Cookie 时，同样可以以多个 Cookie 形式发送。
+
+### 认证
+HTTP/1.1使用的认证方式有：
+* BASIC 认证（基本认证）  
+* DIGEST 认证（摘要认证）  
+* FormBase 认证（基于表单认证）  
+* SSL 客户端认证  
+
+#### Basic认证  
+basic认证就是客户端把`username:passwd`(用户ID和密码用:分隔)字符串，使用Base64编码，写入到请求首部字段Authorization。服务端验证通过返回包含Request-URI资源的响应。  
+缺点是用户名密码都是明文，且无法实现注销操作，基本无人使用。  
+![](/assets/blogImgs/basic.jpg)
+
+#### Digest认证
+digest认证和basic的区别就是不直接明文传输密码。而是依据401响应首部中WWW-Authenticate字段值nounce随机数（经过Basic64编码的十六进制数），和密码放在一起做MD5运算生成摘要。把摘要和用户名以明文方式发送请求给客户端。  
+虽然避免密码泄漏，但是摘要容易被中间人劫持冒充，很少使用。    
+![](/assets/blogImgs/digest.jpg)
+
+#### FormBase认证（使用最多）
+与Basic的区别就是用户名密码在传输过程中有HTTPS加密，且使用了Session ID作为Cookie保存了用户状态。  
+步骤 1：客户端把用户ID和密码等登录信息放入报文的实体部分，以POST方法把请求发送给服务器。使用HTTPS通信来进行HTML表单画面的显示和用户输入数据的发送。  
+步骤 2：服务器发放识别用户的SessionID（SessionID与用户存在一一映射）。通过验证从客户端发送过来的登录信息进行身份认证，然后把用户的认证状态与Session ID 绑定后记录在服务器端。向客户端返回响应时，会在首部字段 Set-Cookie 内写入 SessionID（如 PHPSESSID=028a8c…）。Session ID是服务端识别用户认证状态的关键，应使用难以推测的字符串，服务器端也需要进行有效期的管理，并在Cookie内加上 httponly 属性。  
+步骤 3： 客户端接收到从服务器端发来的 Session ID 后，会将其作为Cookie保存在本地。下次向服务器发送请求时，浏览器会自动发送Cookie，Session ID 也随之发送到服务器。服务器端验证Session ID识别用户和其认证状态。  
+![](/assets/blogImgs/formBase.jpg)
