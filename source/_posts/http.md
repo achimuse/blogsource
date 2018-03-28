@@ -5,7 +5,7 @@ tags:
  - web
 ---
 
-### URI/URL/URN
+## URI/URL/URN
 ![](/assets/blogImgs/url.jpg)
 URI是 Uniform Resource Identifiers 的简写，统一资源标识符。  
 URL是 Uniform Resource Locators 的简写，统一资源定位符。  
@@ -22,10 +22,10 @@ news:comp.infosystems.www.servers.unix (also a URL because of the protocol)
 >telnet://192.0.2.16:80/ (also a URL because of the protocol)  
 >urn:oasis:names:specification:docbook:dtd:xml:4.1.2  
 
-### 被动性  
+## 被动性  
 http协议在一条通路上必然有一端是客户端另一端是服务端，而且只能由客户端发出请求，服务端响应该请求。  
 
-### 常用方法
+## 常用方法
 http请求的根本目标是操作资源，所以请求中使用URI定位资源，使用方法表明意图(restful)：  
 - GET方法，请求资源，查  
 - POST方法，推送资源，增  
@@ -33,18 +33,18 @@ http请求的根本目标是操作资源，所以请求中使用URI定位资源�
 - DELETE方法，删除资源，删
 - HEAD方法，同GET，响应不返回报文主体，用于确认URI有效性和资源更新时间  
 
-### 持久连接与管道化
+## 持久连接与管道化
 持久连接（HTTP Persistent Connections），建立TCP连接后只要任一端没有提出断开连接，则保持连接状态，提高请求相应速度。在同一TCP连接上会有多有HTTP连接，同时线管化（Pipelining）方式使得不用等待上个请求的相应就可以发送下一个请求。  
 
-### 无状态与Cookie
+## 无状态与Cookie
 stateless，不会保存请求或相应的状态，优点在于减少服务器负担。如果需要状态则使用Cookie。客户端第一次向服务端发出请求（要求Cookie），服务端生成Cookie并记录下Cookie与客户端的映射，在响应返回Cookie,客户端收到后保存。之后的每个请求都带上Cookie，即保存了状态。Cookie就是一个字符id。  
 
-### 报文结构
+## 报文结构
 http报文实际是字符串文本，用CR+LF空行划分报文的首部和主体。报文分为请求报文和响应报文。请求行包含请求方法、URI、HTTP版本，状态行包含状态吗、原因短语、HTTP版本。  
 ![](/assets/blogImgs/httpPacket.jpg)  
 ![](/assets/blogImgs/httpPacketReal.jpg)  
 
-### 传输
+## 传输
 http报文在传输过程中，通过内容编码提升传输速率，通过分块实现浏览器逐步显示。  
 
 **报文（message）**  
@@ -75,10 +75,10 @@ http通信的基本单位，由octet sequence组成。如一个完整的请求�
 ![响应首部](/assets/blogImgs/byterangesHead.jpg)
 ![响应主体](/assets/blogImgs/byterangesEntity.jpg)   
 
-### 内容协商（Content Negotiation）
+## 内容协商（Content Negotiation）
 客户端会与服务端协商请求最适合的资源，主要在与资源的语言、字符集、编码方式。故请求的首部字段会有`Accept`/`Accept-Charset`/`Accept-Encoding`/`Accept-Language`/`Content_Language`等协商字段。  
 
-### 状态码
+## 状态码
 ![响应状态码](/assets/blogImgs/statusCode.jpg) 
 **2XX 成功**  
 `200 OK`：请求处理正常   
@@ -101,7 +101,7 @@ http通信的基本单位，由octet sequence组成。如一个完整的请求�
 `500 Internet Server Error`：执行请求出错，服务端内部错误。  
 `503 Service Unavailable`：服务端出于停机维护状态。  
 
-### 通信数据转发
+## 通信数据转发
 HTTP实际通信中，除了客户端和服务端，还有其他通信数据转发程序。 
 
 **代理**  
@@ -116,7 +116,7 @@ HTTP实际通信中，除了客户端和服务端，还有其他通信数据转�
 **隧道**  
 隧道建立安全的通信线路，不会解析http报文，使用SSL加密通信。  
 
-### 缓存
+## 缓存
 缓存代理服务器可以避免多次从源服务器转发资源，客户端可更快地获取资源，也减轻服务端处理负担。  
 
 **TTL（Time to Live）**  
@@ -132,8 +132,7 @@ HTTP实际通信中，除了客户端和服务端，还有其他通信数据转�
 ![](/assets/blogImgs/headerField.jpg)
 单个首部字段可以有多个字段值。
 ![](/assets/blogImgs/headerFields.jpg)
-### 首部字段类型
-#### 通用首部字段（General Header Fields）
+### 通用首部字段（General Header Fields）
 请求报文和响应报文两方都会使用的首部。  
 ![](/assets/blogImgs/generalHeader.jpg)  
 **Connection**  
@@ -145,7 +144,7 @@ HTTP实际通信中，除了客户端和服务端，还有其他通信数据转�
 以下响应报文，采用了分块编码，被分成3312字节和914字节大小的分块，最后以0字节表示块结束。   
 ![](/assets/blogImgs/transferCoding.jpg) 
 
-#### 请求首部字段（Request Header Fields）
+### 请求首部字段（Request Header Fields）
 从客户端向服务器端发送请求报文时使用的首部。补充了请求的附加
 内容、客户端信息、响应内容相关优先级等信息。  
 ![](/assets/blogImgs/requestHeader.jpg)
@@ -191,7 +190,7 @@ HTTP实际通信中，除了客户端和服务端，还有其他通信数据转�
 回状态码 200 OK 的响应及全部资源。  
 `Range: bytes=5001-10000`   
 
-#### 响应首部字段（Response Header Fields）
+### 响应首部字段（Response Header Fields）
 从服务器端向客户端返回响应报文时使用的首部。补充了响应的附加
 内容，也会要求客户端附加额外的内容信息。  
 ![](/assets/blogImgs/responseHeader.jpg)
@@ -217,7 +216,7 @@ HTTP实际通信中，除了客户端和服务端，还有其他通信数据转�
 用于 HTTP 访问认证。告知客户端适用于访问请求 URI 指定资源的认证方案（Basic 或是Digest）和带参数提示的质询（challenge）。状态码 401 Unauthorized 响应中，一定带有首部字段 WWW-Authenticate。  
 `WWW-Authenticate: Basic realm="Usagidesign Auth"`  
 
-#### 实体首部字段（Entity Header Fields）
+### 实体首部字段（Entity Header Fields）
 针对请求报文和响应报文的实体部分使用的首部。补充了资源内容更
 新时间等与实体有关的信息。  
 ![](/assets/blogImgs/entityHeader.jpg)
@@ -250,7 +249,7 @@ Content-Location 表示的是报文主体返回资源对应的URI。
 当首部字段Cache-Control有指定 max-age 指令时，比起首部字段 Expires，会优先处理 max-age 指令。  
 `Expires: Wed, 04 Jul 2012 08:26:05 GMT`   
 
-#### Cookie首部字段（RCookie Fields）  
+### Cookie首部字段（RCookie Fields）  
 **Set-Cookie**  
 当服务器准备开始管理客户端的状态时，会事先告知各种信息。以下是Set-Cookie 的字段值。
 ![](/assets/blogImgs/setCookie.jpg)
@@ -260,27 +259,27 @@ Content-Location 表示的是报文主体返回资源对应的URI。
 持时，就会在请求中包含从服务器接收到的 Cookie。接收到多个
 Cookie 时，同样可以以多个 Cookie 形式发送。
 
-### 认证
+## 认证
 HTTP/1.1使用的认证方式有：
 * BASIC 认证（基本认证）  
 * DIGEST 认证（摘要认证）  
 * SSL 客户端认证  
 * FormBase 认证（基于表单认证）  
 
-#### Basic认证  
+### Basic认证  
 basic认证就是客户端把`username:passwd`(用户ID和密码用:分隔)字符串，使用Base64编码，写入到请求首部字段Authorization。服务端验证通过返回包含Request-URI资源的响应。  
 缺点是用户名密码都是明文，且无法实现注销操作，基本无人使用。  
 ![](/assets/blogImgs/basic.jpg)
 
-#### Digest认证
+### Digest认证
 digest认证和basic的区别就是不直接明文传输密码。而是依据401响应首部中WWW-Authenticate字段值nounce随机数（经过Basic64编码的十六进制数），和密码放在一起做MD5运算生成摘要。把摘要和用户名以明文方式发送请求给客户端。  
 虽然避免密码泄漏，但是摘要容易被中间人劫持冒充，很少使用。    
 ![](/assets/blogImgs/digest.jpg)
 
-#### SSL客户端认证
+### SSL客户端认证
 需要使用证书，且一般结合表单认证使用。证书用于认证客户端（保护通信过程），用户名密码用于认证用户本人。浏览器一般都预先放置了各大网站（bing、ali等等）的证书，所以对于别的网站如网银、12306都要求用户在使用前安装相关证书。  
 
-#### FormBase认证（使用最多）
+### FormBase认证（使用最多）
 与Basic的区别就是用户名密码在传输过程中有HTTPS加密，且使用了Session ID作为Cookie保存了用户状态。  
 步骤 1：客户端把用户ID和密码等登录信息放入报文的实体部分，以POST方法把请求发送给服务器。使用HTTPS通信来进行HTML表单画面的显示和用户输入数据的发送。  
 步骤 2：服务器发放识别用户的SessionID（SessionID与用户存在一一映射）。通过验证从客户端发送过来的登录信息进行身份认证，然后把用户的认证状态与Session ID 绑定后记录在服务器端。向客户端返回响应时，会在首部字段 Set-Cookie 内写入 SessionID（如 PHPSESSID=028a8c…）。Session ID是服务端识别用户认证状态的关键，应使用难以推测的字符串，服务器端也需要进行有效期的管理，并在Cookie内加上 httponly 属性。  
