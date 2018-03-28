@@ -132,23 +132,78 @@ HTTP实际通信中，除了客户端和服务端，还有其他通信数据转�
 由首部字段名和字段值组成，用:分隔。例如Content-Type字段，表明报文主体的对象类型。
 ![](/assets/blogImgs/headerField.jpg)
 单个首部字段可以有多个字段值。
-![](/assets/blogImgs/headerField.jpg)
+![](/assets/blogImgs/headerFields.jpg)
 ### 首部字段类型
-**通用首部字段（General Header Fields）**  
+#### 通用首部字段（General Header Fields）
 请求报文和响应报文两方都会使用的首部。  
-![](/assets/blogImgs/generalHeader.jpg)
+![](/assets/blogImgs/generalHeader.jpg)  
+**Connection**  
+ 转发过程中删除某些字段，例如`Connection: Hop-by-hop`在代理转发给服务端前会删除Hop-by-hop字段。  
+ 管理持久连接，例如`Connection: close`表明是断开tcp连接；客户端请求`Connection: Keep-Alive`，服务端响应`Keep-Alive: time-out=10, max=500`+`Connection: Keep-Alive`表明是建立持久连接。  
 
-**请求首部字段（Request Header Fields）**  
+**Transfer-Encoding**  
+规定传输报文主体编码方式，实际上HTTP/1.1中只对分块编码有效，其他的编码方式由内容编码字段`Content-Encoding`指定。  
+以下响应报文，采用了分块编码，被分成3312字节和914字节大小的分块，最后以0字节表示块结束。   
+![](/assets/blogImgs/transferCoding.jpg) 
+
+#### 请求首部字段（Request Header Fields）
 从客户端向服务器端发送请求报文时使用的首部。补充了请求的附加
 内容、客户端信息、响应内容相关优先级等信息。  
 ![](/assets/blogImgs/requestHeader.jpg)
+**Accept**  
+通知服务端用户代理支持的媒体类型及其优先级，媒体类型有：
+- 文本文件如text/html, text/plain, text/css, application/xhtml+xml, application/xml.  
+- 图片文件（二进制文件）如image/jpeg, image/gif, image/png.  
+- 视频文件（二进制文件）如video/maped, video/quicktime.  
+- 应用程序使用的二进制文件如application/octet-stream, application/zip.  
+指定优先级可在字段值后加上q=，分号;分隔，范围0.000--1.000，不指定默认q=1.0。  
+`Accept: text/html,application/xhtml+xml,application/xml;q=0.7`  
 
-**响应首部字段（Response Header Fields）**  
+**Accep-Charset**  
+来通知服务器用户代理支持的字符集及字符集的相对优先顺序，优先级同上。  
+`Accept-Charset: iso-8859-5, unicode-1-1;q=0.8`  
+
+**Accept-Encoding**  
+通知服务器用户代理支持的内容编码（使用星号\*表示任意格式）及内容编码的优先级顺序，优先级同上。  
+`Accept-Encoding: gzip, deflate, compress, identity`  
+同样的Accept-Language字段表明支持的自然语言集。  
+`Accept-Language: zh-cn,zh;q=0.7,en-us,en;q=0.3`  
+
+**Authorization**  
+用户代理接收到响应状态码为401 Unauthorized时，会把首部字段Authorization加入请求，包含着认证信息。  
+`Authorization: Basic dWVub3NlbjpwYXNzd29yZA==`  
+
+**Host**  
+多个虚拟主机在同一个IP上，使用Host字段可以加以区分,若服务端未设主机名直接发送空值即可。  
+`Host: www.hackr.jp`    
+
+**User-Agent**  
+将创建请求的浏览器和用户代理名称等信息传达给服务器。如果经过代理也可能加上代理服务器名称。    
+`User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64; rv:13.0)`
+
+**Max-Forwards**  
+报文途经多个代理服务器有可能在代理间变成死循环，Max-Forwards的值是一个数字，每经过一个服务器就会减1，为0之后服务器不再转发并直接返回响应。（实际上tcp/ip的路由算法里也有类似机制）  
+
+**Range**  
+对于只需获取部分资源的范围请求，包含首部字段 Range 即可告知服
+务器资源的指定范围。  
+接收到附带 Range 首部字段请求的服务器，会在处理请求之后返回状
+态码为 206 Partial Content 响应。无法处理该范围请求时，则会返
+回状态码 200 OK 的响应及全部资源。  
+`Range: bytes=5001-10000`   
+
+#### 响应首部字段（Response Header Fields）
 从服务器端向客户端返回响应报文时使用的首部。补充了响应的附加
 内容，也会要求客户端附加额外的内容信息。  
 ![](/assets/blogImgs/responseHeader.jpg)
+**Accept-Ranges**  
+告知客户端服务端能否处理范围请求，以指定获取服务器端某个部分的资源。可指定的字段值有两种，可处理范围请求时指定其为 bytes，反之则指定其为 none。  
+`Accept-Ranges: bytes`  
+`Accept-Ranges: none`  
 
-**实体首部字段（Entity Header Fields）**  
+
+
+#### 实体首部字段（Entity Header Fields）
 针对请求报文和响应报文的实体部分使用的首部。补充了资源内容更
 新时间等与实体有关的信息。  
 ![](/assets/blogImgs/entityHeader.jpg)
