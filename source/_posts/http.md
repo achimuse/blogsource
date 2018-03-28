@@ -264,8 +264,8 @@ Cookie 时，同样可以以多个 Cookie 形式发送。
 HTTP/1.1使用的认证方式有：
 * BASIC 认证（基本认证）  
 * DIGEST 认证（摘要认证）  
-* FormBase 认证（基于表单认证）  
 * SSL 客户端认证  
+* FormBase 认证（基于表单认证）  
 
 #### Basic认证  
 basic认证就是客户端把`username:passwd`(用户ID和密码用:分隔)字符串，使用Base64编码，写入到请求首部字段Authorization。服务端验证通过返回包含Request-URI资源的响应。  
@@ -276,6 +276,9 @@ basic认证就是客户端把`username:passwd`(用户ID和密码用:分隔)字�
 digest认证和basic的区别就是不直接明文传输密码。而是依据401响应首部中WWW-Authenticate字段值nounce随机数（经过Basic64编码的十六进制数），和密码放在一起做MD5运算生成摘要。把摘要和用户名以明文方式发送请求给客户端。  
 虽然避免密码泄漏，但是摘要容易被中间人劫持冒充，很少使用。    
 ![](/assets/blogImgs/digest.jpg)
+
+#### SSL客户端认证
+需要使用证书，且一般结合表单认证使用。证书用于认证客户端（保护通信过程），用户名密码用于认证用户本人。浏览器一般都预先放置了各大网站（bing、ali等等）的证书，所以对于别的网站如网银、12306都要求用户在使用前安装相关证书。  
 
 #### FormBase认证（使用最多）
 与Basic的区别就是用户名密码在传输过程中有HTTPS加密，且使用了Session ID作为Cookie保存了用户状态。  
