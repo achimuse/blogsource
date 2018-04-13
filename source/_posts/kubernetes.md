@@ -27,7 +27,7 @@ Master和Node可以是物理主机也可以是虚拟主机，Node的最小运行
 ### 基本使用
 不赘述安装配置过程，要实现集群最少要两个主机，一个Master一个Node。假设已经配置好了，在Kubernetes上玩玩基本的RC、Pod、Service、Container。创建提供MySQL服务的Service为例。  
 
-####创建RC、Pod   
+#### 创建RC、Pod   
 Kubernetes的各种配置文件基本都是yaml，创建RC首先写一个xx-rc.yaml文件。  
 **首先创建mysql-rc.yaml文件**  
 ```yaml
@@ -97,3 +97,30 @@ $ kubectl get svc
 NAME  CLUSTER-IP      EXTERNAL-IP   PORT(S)  AGE
 mysql 169.169.253.143 <none>        3306/TCP  1m
 ```
+
+**查询操作**  
+在Master节点上，使用kubectl可以实现对Node/Pod/Replication Controller/Service查询和删除。  
+```bash
+$ kubectl get [node | pod | rc | svc] | grep 'regexr'
+$ kubectl describe [node | pod | rc | svc]
+$ kubectl delete [node | pod | rc | svc]
+```
+### 回到概念
+Kubernetes把Node/Pod/Replication Controller/Service看作资源对象，这些资源都可以由Master节点调控进行增删改查，具体就是使用Master的kubectl工具或者编码调用API。资源对象的操作结果保存在etcd的持久化存储中。在自动化调控时，通过对比etcd里保存的资源期望状态与当前环境的实际资源状态，实现自动控制、纠错。  
+
+#### Matser
+每个集群都有一个Master结点，负责管理控制集群，所有的控制命令都是由Master来执行的。所以基本上管理操作都是在Master上进行的，Master单独占有一个机器（物理机/云上虚机）运行着关键的进程。  
+- Kubernetes API Server（kube-apiserver），提供HTTP Rest接口，资源增删改查和集群控制的唯一入口。  
+- Kubernetes Controller Manager （kube-controller-manager），资源对象的自动化控制中心。  
+- Kubernetes Scheduler （kube-scheduler），负责资源（Pod）调度。
+- etcd Server，保存所有资源对象的数据。
+
+#### Node
+工作负载点，除了Master，集群上的其他机器都是Node节点。每个个Node都会被分配到工作负载，某个Node宕机时Master自动转移负载到其他节点。Node运行着以下进程。  
+- kubelet，负责容器的创建、启停，与Master协作实现基本的集群管理。  
+- kube-proxy，实现Service之间的通信、负载均衡的重要组件。  
+- Docker Engine，docker引擎，负责本节点的容器创建、管理。  
+Node结点可以在集群运行期间动态添加，其中的kubelet进程会向Master注册本节点。在集群内的Node会定时给Master上报信息，操作系统、docker版本、cpu内存使用情况、Pod运行情况，Master基于上报信息实现资源调度。若超时不上报，Master会判定该节点不可用（Not Ready），并自动将该结点的负载转移到别的结点。  
+使用describe命令可以查到Node的详细信息。  
+- Node的名字、Label、创建时间  
+- 运行状态，如磁盘满了（OutOfDisk=True）、内存不足（MemoryPressure=True）、Ready状态（Ready=True）。如果是Ready=True则表示正常。  
