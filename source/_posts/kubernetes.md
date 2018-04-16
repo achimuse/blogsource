@@ -455,7 +455,7 @@ spec:
     - '3600'
    name: busybox
 ```
-创建该Pod以后需要指定Namespace茶能查看。  
+创建该Pod以后需要指定Namespace才能查看。  
 ```bash
 $ kubectl get pod --namespace=development
 ```
