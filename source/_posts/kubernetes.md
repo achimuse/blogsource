@@ -198,7 +198,7 @@ spec:
 ```
 
 ### Label
-一个Label是key-value键值对，key、value都由用户指定。Label可以附加到各种资源对象上，如Node、Pod、Service、RC。一个资源可以有任意个Label，同一个Label可以附加到任意多个资源上。Lbel在资源对象定义时确定，可以在对象创建后动态添加删除。  
+一个Label是key-value键值对，key、value都由用户指定。Label可以附加到各种资源对象上，如Node、Pod、Service、RC。一个资源可以有任意个Label，同一个Label可以附加到任意多个资源上。Label在资源对象定义时确定，可以在对象创建后动态添加删除。  
 Label的意义在于多维度的资源分组管理，方便自愿的分配、调度、配置、部署。  
 Label Selector可以查询和筛选具有目标Label的资源对象，类似于SQL的对象查询机制。Label Selector的表达式有Equlity-based和Set-based，表达式可以使用逗号分隔进行组合查询。  
 Label Selector的使用场景有以下几处。  
@@ -433,3 +433,29 @@ Pod挂载到宿主机上的文件或目录。
 
 ### Namespace
 Namespace用于实现多租户资源隔离，通过将集群内部的资源对象分配到不同的Namespace中，形成逻辑上分组不同项目、小组、用户组。  
+Kubernetes集群在启动后，会创建名为default的Namespace，可以通过kubectl get查看。不特别指定时用户创建的Pod、RC、Service都被创建到default这个Namespace上。
+```yaml
+apiVersion: v1
+kind: Namespace
+metadata:
+ name: development
+```
+使用kubectl create创建development Namespace以后，可以指定创建Pod等资源到这个Namespace。  
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+ name: busybox
+ namespace: development
+spec:
+ containers:
+ - image: busybox
+   command:
+    - sleep
+    - '3600'
+   name: busybox
+```
+创建该Pod以后需要指定Namespace茶能查看。  
+```bash
+$ kubectl get pod --namespace=development
+```
