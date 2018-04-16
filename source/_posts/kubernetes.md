@@ -232,6 +232,204 @@ RC定义的是一个期望的场景，声明某种Pod的副本数量在忍一时
 $ kubectl scale rc redis-slave --replicas=3
 ```
 
+RC机制可以实现Rolling Update，即升级是每停止一个旧版本Pod就创建好一个新版本Pod，始终保持Pod在预期数量。  
+Replication Controller升级了新概念Replication Set，与原有概念的区别是Label Selector支持Set-based selector。Replication Set主要被Deployment这个资源使用，很少单独使用，Replication Set和Deployment这两个资源对象已经逐渐替代了RC，
+```yaml
+apiversion: extensions/v1beta1
+kind: ReplicaSet
+metadata:
+ name: frontend
+spec:
+ selector:
+  matchLabels:
+   tier: frontend
+  matchExpressions:
+   - {key: tier, operator: In, value: [frontend]}
+  template:
+   ......
+```
 
+### Deployment
+Deployment目的是为了解决Pod编排问题。Deployment内部使用Replication Set实现目的。Deployment是RC的升级，相比而言可以让用户随时知道Pod的部署进度（一个大点的集群从开机到完全部署好可能需要半个小时或者以上）。
+Deployment的使用场景有以下几个。  
+- 创建一个Deployment对象生成对应的Replication Set并完成Pod副本的创建。  
+- 检查Deployment状态查看部署动作是否完成。  
+- 更新Deployment创建新的Pod（如镜像升级）。  
+- 当前Deployment不稳定可以回滚之前的版本。  
+- 挂起或回复一个Deployment。  
 
+以下是Deployment的yaml定义文件。
+```yaml
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+ name: frontend
+spec:
+ replicas: 1
+ selector:
+  matchLabels:
+   tier: frontend
+  matchExpressions:
+   - {key: tier, operator: In, values: [frontend]}
+ template:
+  metadata:
+   labels:
+    app: app-demo
+    tier: frontend
+   spec:
+    containers:
+    - name: tomcat-demo
+      image: tomcat
+      imagePullPolicy: ifNotPresent
+      ports:
+      - containerPort: 8080
+```
 
+使用以下命令创建Deployment，查看Deployment、RS：
+```bash
+$ kubectl create -f tomcat-deployment.yaml
+
+$ kubectl get deployments
+
+$ kubectl get rs
+```
+
+### Horizontal Pod Autoscaler(HPA)
+手动使用kubectl scale对pod进行扩缩容达不到自动化、智能化。HPA是Pod的自动扩容机制，也是Kubernetes的资源对象。可以通过追踪分析RC控制的所有目标Pod负载情况针对性地调整Pod副本数，通常是以CPUUtilizationPercentage和应用程序自定义的度量指标如TPS/QPS作为度量指标。  
+CPUUtilizationPercentage是目标Pod所有副本的CPU利用率的平均值。单个Pod的CPU利用率平均值=当前CPU使用量 / Pod Request的值。  
+从而算出所有Pod的CPU利用率平均值。如设置UUtilizationPercentage超过80%就可能需要动态扩容。  
+在负载高峰过去以后Pod数量会自动降下来。  
+```yaml
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+ name: php-apche
+ namespace: default
+spec:
+ maxReplicas: 10 	#扩缩容后Pod副本数的范围介于1到10
+ minReplicas: 1
+ scaleTargetRef:
+  kind: Deployment
+  name: php-apache
+ targetCPUUtilizationPercentage: 80 	#超过80%CPU使用率就触发自动扩容
+```
+除了使用kubectl create创建以上定义的HPA对象，还可以直接通过命令行创建。  
+```bash
+$ kubectl autoscale deployment php-apache --cpu-percent=80 --min=1 --max=10
+```
+
+### Service
+#### 概述
+![Service/RC/Pod](/assets/blogImgs/service.jpg)
+Service就是微服务架构的微服务，Pod、RC等对象资源都是为Service服务的。Kubernetes的Service定义了服务的访问入口地址，前端的应用（Pod）通过入口地址访问其背后一组有Pod副本组成的集群实例。Label Selector作为两者的桥接，RC保证Service服务能力和质量处于预期。  
+集群由多个提供不同业务能力且彼此独立的微服务组成，服务之间通过TCP/IP同性。每个Pod会被分配到单独的IP，有独立的EndPoint（Pod IP + ContainerPort），多个Pod副本组成集群提供服务，一般的部署一个负载均衡器为这组Pod开启一个对外的服务端口如8000，并将Pod副本们的EndPoint加入8000端口的转发列表。客户端通过负载均衡器的对外IP+服务端口来访问该服务。  
+每个Node上的kube-proxy进程就是一个负载均衡器，负责把对Service的请求转发到某个Pod实例，并在内部实现了服务的负载均衡和会话保持机制。Service不是共用一个负载均衡器的IP，而是每个Service分配了一个全局唯一的虚拟IP地址，被称为Cluster IP，Service就具备唯一IP地址的通信结点。调用服务也变成了基础的TCP网络通信。  
+Pod的EndPoint地址随着Pod的销毁和重新创建发生改变，新的Pod与老的Pod 的Pod IP不一致。而Service一旦创建，Cluster IP在其整个生命周期里都不会改变。  
+**服务发现**问题就可以使用Service的Name与Cluster IP做成DNS域名映射即可。  
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+ name: tomcat-service
+spec:
+ ports:
+ - port: 8080 	#服务端口为8080
+ selector:
+  tier: frontend 	#拥有tier=frontend标签的Pod实例都属于该Service
+```
+kubectl create创建好服务后使用kubectl get endpoints可以查看Service的EndPoint列表。  
+```bash
+$ kubectl create -f tomcat-service.yaml
+$ kubectl get endpoints
+$ kubectl get svc tomcat-service -o yaml
+//在spec可以查看到Service的Cluster IP
+//在spec.ports可以看到targetPort属性，用来确定提供该服务的容器expose的端口号，即具体业务进程在容器内的targetPort上提供TCP/IP接入，而port属性定义了Service的需端口。不指定targetPort时默认与port相同。
+```
+
+Service存在多端口的情况，通常一个端口提供业务服务，另一个提供管理服务。Kubernetes Service支持多个EndPoint，存在多个EndPoint情况下要求每个EndPoint定义名字划分，如下service yaml定义文件。
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+ name: tomcat-service
+spec:
+ ports:
+ - port: 8080
+  name:service-port
+ -port: 8005
+  name: shutdown-port
+ selector:
+  tier: frontend
+```
+
+#### 服务发现机制
+最初使用环境变量给每个Service生成对应的ENV，在每个容器启动是自动注入环境变量。环境变量包含Cluster IP和若干Port。如TOMCAT_SERVICE_HOST=169.169.41.218,TOMCAT_SERVICE_PORT_SERVICE_PORT=8080,TOMCAT_SERVICE_PORT_SHUTDOWN_PORT=8005.  
+后来引入DNS机制之间使用服务名建立通信连接。
+
+#### 外部访问Service
+区分三种IP 
+- Node IP：Node节点的IP，kubernetes集群每个节点的网卡IP，是真实存在的物理网络，属于这个网络的服务器之间可以之间通信，不管结点是否属于集群。所以集群外访问集群内的某节点或者TCP/IP服务时，必须要通过Node IP通信。  
+- Pod IP：Pod的IP，Docker Engine根据docker0网桥的IP地址端进行分配的虚拟二层网络，不同Node上的任意两个Pod可以直接通信，就是通过Pod IP所在的虚拟二层网络通信的，真实的TCP/IP流量通过Node IP所在的物理网卡流出。  
+- Cluster IP：Service的IP，虚拟的IP。
+
+Cluster IP仅作用于Service这个对象，由Kubernetes分配管理IP地址。  
+Cluster IP无法被Ping，因为没有实体网络对象来响应。  
+Cluster IP只能结合Service Port组成一个具体的通信端口，单独的Cluster IP不具备TCP/IP通信基础，Cluster IP + Service Port属于集群的封闭空间。  
+集群内，Node IP网、Pod IP网与Cluster IP网之间的通信采用的是Kubernetes自己设计的变成方式特殊路由规则。  
+
+由于Cluster IP属于集群内部地址，外部无法直接使用这个地址。采用NodePort解决外部访问Service问题。  
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+ name: tomcat-service
+spec:
+ type: NodePort
+ ports:
+  - port: 8080
+    nodePort: 31002 #手动指定NodePort为310002，否则Kubenetes自动分配一个可用端口，http://<nodePort IP>:31002/即可访问Service。
+ selector:
+    tier: frontend
+```
+NodePort的实现方式是在集群的每个Node上微需要外部访问的Service开放一个TCP监听端口，外部系统只要用任意一个Node的IP + 具体NodePort端口号即可访问服务。任意Node上运行netstat可以看到有Node可以看到NodePort端口被监听。 
+NodePort没有完全解决外部访问Service的问题，如负载均衡。集群中有多个Node，此时做好有负载均衡器，外部请求至访问负载均衡器IP地址。由负载均衡器装法流量到某个Node的NodePort上。  
+![Load balancer](/assets/blogImgs/nodeport.jpg)
+Load balancer组件独立于Kubernetes集群之外，通常是HAProxy或者Nginx。此外Kubernetes提供了自动化解决方案，只要把Service的type=
+NodePort改为type=
+LoadBalancer，Kubernetes会自动创建一个Load balancer实例并返回它的IP供外部访问。  
+
+### Volume
+Volume是Pod中能被多个容器访问的共享目录。Kubernetes的Volume的概念、用途和目的与Docker的Volume类似，但不等价。Kubernetes Volume定义在Pod上，Pod的多个容器挂在到具体的文件目录下，与Pod的生命周期形同，与容器生命周期不相关。container终止或重启Volume中的数据也不会丢失。Kubernetes支持多种类型Volume，GlusterFS、Ceph等分布式文件系统。  
+现在Pod上声明一个Volume，然后在容器里引用并mount到容器某个目录上。如给TomcatPod增加一个名字为dataVol的Volume，并且mount到容器的/mydata-data目录上。可以对Pod的定义做如下修改。  
+```yaml
+template:
+ metadata:
+  labels:
+   app: app-demo
+   tier: frontend
+  spec:
+   volumes:
+    - name: datavol #声明一个叫datavol的volume
+      emptyDir: {}
+   containers:
+    - name: tomcat-demo
+      image: tomcat
+      volumeMounts: #把datavol挂在到容器的/mydata-data上
+       - mountPath: /mydata-data
+         name: datavol
+      imagePullPolicy: ifNotPresent
+```
+Pod Volume除了可以上多个container共享文件、让container数据写到宿主机磁盘上或者写到网络存储上，还可以有容器配置文件集中化定义管理，通过ConfigMap资源对象来实现。以下是Volume类型。  
+
+**emptyDir**  
+emptyDir Volume是Pod分配到Node时创建的，初始内容为空，无需指定宿主机上对应目录，这是Kubernetes自动分配的目录，Pod从Node上移除是，emptyDir的数据被永久删除。用处如下  
+- 临时空间，用于程序运行时的临时目录。  
+- 长时间任务的CheckPoint临时保存目录。  
+- 多容器共享目录。  
+**hostPath**  
+Pod挂载到宿主机上的文件或目录。
+- 容器应用的日志需要永久保存，可以使用宿主机高速文件系统存储。
+- 需要访问宿主机上Docker引擎内部数据结构的容器应用时，通过定义hostPath为宿主机/var/lib/docker目录，可以使容器内部应用直接访问Docker的文件系统。
+
+### Namespace
+Namespace用于实现多租户资源隔离，通过将集群内部的资源对象分配到不同的Namespace中，形成逻辑上分组不同项目、小组、用户组。  
