@@ -143,14 +143,14 @@ Node结点可以在集群运行期间动态添加，其中的kubelet进程会向
 ### Pod
 Pod是Kubernetes的重要概念，每个Pod都有一个称为Pause容器的根容器，Pause容器的镜像是Kubernetes的一部分。Pod还有多个业务容器。  
 **Pod的结构**
-![Pod结构](/assets/blogImgs/pod.jpg) 
+![Pod结构](/assets/blogImgs/pod.JPG) 
 - 多个容器组成一个业务单元，业务容器内部跑着承载服务的代码，可能会出现问题。引入稳定的Pause容器，用Pause容器的状态代表整个容器组的状态，便于判断整个容器组（Pod）的状态。  
 - 每个Pod都有唯一的Pod IP，内部容器共享Pod的IP，也共享Pause容器的挂载卷Volume，简化了业务容器之间的通信和文件共享。  
 - 基于虚拟二层网络技术，集群内任意两个Pod可以直接进行TCP/IP通信，Pod的容器也可以直接与其他Node上的容器进行通信。 
 
 **Pod的创建**
 Pod实际上就是一个抽象的概念，在Matser被创建，随后被调度绑定到Node，然后实例化成一组容器。除了普通的Pod，还有static Pod。static Pod存放在某个Node的具体文件里。普通Pod一旦创建就会被放到Kubernetes的etcd存储里，然后被Kubernetes Master调度到某个Node上Binding，对应Node的kubelet进程将该Pod实例化成一组容器并启动。  
-![Node Pod的关系](/assets/blogImgs/pod-node.jpg) 
+![Node Pod的关系](/assets/blogImgs/pod-node.JPG) 
 
 **Pod的yaml定义文件**  
 ```yaml
@@ -175,7 +175,7 @@ spec:
 - containers数组里指定具体某个container开放的Port，containerPort和Pod IP组成一个概念--**endpoint**，代表这Pod里这个服务进程对外通信地址。  
 - containers数组里指定具体某个container内部的环境变量。  
 - Kubernetes的各类资源上有Event概念，是对一个事件最早产生时间、最后重现时间、重复次数、发起者、类型及事件发生原因的记录。Pod也有相应的Event，使用describe可查看。 
-![endPoint/volume/Event](/assets/blogImgs/endpoint.jpg)  
+![endPoint/volume/Event](/assets/blogImgs/endpoint.JPG)  
 
 **Pod的计算资源**  
 Pod对使用主机CPU和Memory资源设置限额，Kubernetes对CPU的配额是以千分之一核数为单位（m）,通常一个容器的CPU配额为100-300m，这是一个绝对值，表示使用0.1-0.3个CPU。内存配额单位是字节（Mi），也是一个绝对值。  
@@ -214,8 +214,8 @@ Label的常用分类有：
 - 质量管控标签："track": "daily", "track": "weekly"  
 
 如下图，假设Pod定义了三个Label，release、env和role，不同的Pod定义了不同的Label值，如果设置了role=frontend的Label Selector，则会选取到Node1和Node2的Pod。若设置role=beta的Label Selector则会选到Node2和Node3的Pod。
-![](/assets/blogImgs/labelselector0.jpg)
-![](/assets/blogImgs/labelselector1.jpg)
+![](/assets/blogImgs/labelselector0.JPG)
+![](/assets/blogImgs/labelselector1.JPG)
 
 ### Replication Controller
 RC定义的是一个期望的场景，声明某种Pod的副本数量在忍一时刻都符合某个预期值。RC定义包含以下及部分，具体可参考第二部分的rc定义yaml文件。
@@ -225,8 +225,8 @@ RC定义的是一个期望的场景，声明某种Pod的副本数量在忍一时
 
 定义RC并提交到Kubernetes集群后，Master结点的Controller Manager就会定期检查集群中当前存活的目标Pod，自动维持在目标副本数量。  
 以三个Node结点集群为例，如果RC定义了redis-slave需要保持2个Pod副本，集群可能在其中两个Node上创建Pod。假设Node2上的Pod2意外终止，集群可能选择Node3或者Node1来创建新的Pod。  
-![](/assets/blogImgs/controllermanager0.jpg)
-![](/assets/blogImgs/controllermanager1.jpg)
+![](/assets/blogImgs/controllermanager0.JPG)
+![](/assets/blogImgs/controllermanager1.JPG)
 此外，在动态运行时可以通过修改RC副本数实现Pod的动态缩放Scaling功能。删除RC并不会删除已经创建的Pod，可以设置replicas值为0来删除Pod。
 ```bash
 $ kubectl scale rc redis-slave --replicas=3
@@ -393,7 +393,7 @@ spec:
 ```
 NodePort的实现方式是在集群的每个Node上微需要外部访问的Service开放一个TCP监听端口，外部系统只要用任意一个Node的IP + 具体NodePort端口号即可访问服务。任意Node上运行netstat可以看到有Node可以看到NodePort端口被监听。 
 NodePort没有完全解决外部访问Service的问题，如负载均衡。集群中有多个Node，此时做好有负载均衡器，外部请求至访问负载均衡器IP地址。由负载均衡器装法流量到某个Node的NodePort上。  
-![Load balancer](/assets/blogImgs/nodeport.jpg)
+![Load balancer](/assets/blogImgs/nodeport.JPG)
 Load balancer组件独立于Kubernetes集群之外，通常是HAProxy或者Nginx。此外Kubernetes提供了自动化解决方案，只要把Service的type=
 NodePort改为type=
 LoadBalancer，Kubernetes会自动创建一个Load balancer实例并返回它的IP供外部访问。  
